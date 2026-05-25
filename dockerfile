@@ -70,6 +70,7 @@ RUN mkdir -p storage/framework/cache \
 
 # Run migrations
 RUN php artisan migrate --force || true
+RUN php artisan db:seed --force || true
 
 # Expose port
 EXPOSE 10000
