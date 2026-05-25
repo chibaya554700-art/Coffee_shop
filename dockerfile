@@ -33,10 +33,6 @@ RUN printf '<Directory /var/www/html/public>\n\
 </Directory>\n' > /etc/apache2/conf-available/laravel.conf \
     && a2enconf laravel
 
-# Install Node.js
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y nodejs
-
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
@@ -54,9 +50,6 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 # Generate app key
 RUN php artisan key:generate --force
-
-# Install frontend dependencies and build assets
-RUN npm install && npm run build
 
 # Clear caches
 RUN php artisan config:clear \
