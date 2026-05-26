@@ -42,21 +42,15 @@ WORKDIR /var/www/html
 # Copy Laravel app
 COPY . .
 
-# Copy .env file
-RUN cp .env.example .env
-
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-# Generate app key
-RUN php artisan key:generate --force
-
-# Clear caches
+# Clear caches (safe)
 RUN php artisan config:clear \
     && php artisan route:clear \
-    && php artisan view:clear
+    && php artisan view:clear || true
 
-# Create storage symlink
+# Create storage symlink (safe if it already exists)
 RUN php artisan storage:link || true
 
 # Fix permissions
@@ -68,12 +62,5 @@ RUN mkdir -p storage/framework/cache \
     && chown -R www-data:www-data storage bootstrap/cache public/uploads \
     && chmod -R 775 storage bootstrap/cache public/uploads
 
-# Run migrations
-RUN php artisan migrate --force || true
-RUN php artisan db:seed --force || true
-
-# Expose port
 EXPOSE 10000
-
-# Start Apache
 CMD ["apache2-foreground"]
