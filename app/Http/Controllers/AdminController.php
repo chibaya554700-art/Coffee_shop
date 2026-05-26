@@ -56,7 +56,7 @@ class AdminController extends Controller
         $data['is_available'] = $request->has('is_available');
 
         if ($request->hasFile('image') && $request->file('image')->isValid()) {
-            // saves to storage/app/public/products/...
+            // storage/app/public/products/...
             $path = $request->file('image')->store('products', 'public');
             $data['image'] = $path; // "products/filename.jpg"
         }
@@ -85,7 +85,6 @@ class AdminController extends Controller
         $data['is_available'] = $request->has('is_available');
 
         if ($request->hasFile('image') && $request->file('image')->isValid()) {
-            // optional: delete old image if it exists
             if (!empty($product->image)) {
                 Storage::disk('public')->delete($product->image);
             }
@@ -100,7 +99,6 @@ class AdminController extends Controller
 
     public function deleteProduct(Product $product)
     {
-        // optional: delete image when deleting product
         if (!empty($product->image)) {
             Storage::disk('public')->delete($product->image);
         }
