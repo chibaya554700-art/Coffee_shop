@@ -1,3 +1,4 @@
+use Illuminate\Support\Facades\Storage;
 @extends('layouts.app')
 
 @section('title', 'Manage Products — Admin')
@@ -42,11 +43,9 @@
                                 <div class="flex items-center gap-3">
                                     <div class="w-10 h-10 rounded-lg bg-coffee-100 overflow-hidden flex-shrink-0">
                                         @if($product->image)
-                                            @php
-                                                use Illuminate\Support\Facades\Storage;
-                                            @endphp
-                                            <img src="{{ Storage::url($product->image) }}"
-                                                 class="w-full h-full object-cover">
+                                            <img src="{{ \Illuminate\Support\Facades\Storage::url($product->image) }}"
+                                                 class="w-full h-full object-cover"
+                                                 alt="{{ $product->name }}">
                                         @else
                                             <div class="w-full h-full flex items-center justify-center text-lg">☕</div>
                                         @endif
