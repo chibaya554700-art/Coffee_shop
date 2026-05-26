@@ -5,13 +5,12 @@ RUN apt-get update && apt-get install -y \
     git \
     unzip \
     curl \
-    libpq-dev \
     libzip-dev \
     libonig-dev \
     libxml2-dev \
     libpng-dev \
     zip \
-    && docker-php-ext-install pdo pdo_mysql pdo_pgsql zip mbstring xml \
+    && docker-php-ext-install pdo pdo_mysql zip mbstring xml \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -45,12 +44,7 @@ COPY . .
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-# Clear caches (safe)
-RUN php artisan config:clear \
-    && php artisan route:clear \
-    && php artisan view:clear || true
-
-# Create storage symlink (safe if it already exists)
+# Create storage symlink
 RUN php artisan storage:link || true
 
 # Fix permissions
@@ -62,5 +56,9 @@ RUN mkdir -p storage/framework/cache \
     && chown -R www-data:www-data storage bootstrap/cache public/uploads \
     && chmod -R 775 storage bootstrap/cache public/uploads
 
+# Copy and set entrypoint
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 EXPOSE 10000
-CMD ["apache2-foreground"]
+ENTRYPOINT ["/entrypoint.sh"]
