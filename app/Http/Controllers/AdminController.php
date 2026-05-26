@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class AdminController extends Controller
 {
@@ -55,10 +56,9 @@ class AdminController extends Controller
         $data['is_available'] = $request->has('is_available');
 
         if ($request->hasFile('image') && $request->file('image')->isValid()) {
-            $file     = $request->file('image');
-            $filename = time() . '_' . $file->getClientOriginalName();
-            $file->move(public_path('storage/products'), $filename);
-            $data['image'] = 'products/' . $filename;
+            // saves to storage/app/public/products/...
+            $path = $request->file('image')->store('products', 'public');
+            $data['image'] = $path; // "products/filename.jpg"
         }
 
         Product::create($data);
@@ -85,10 +85,13 @@ class AdminController extends Controller
         $data['is_available'] = $request->has('is_available');
 
         if ($request->hasFile('image') && $request->file('image')->isValid()) {
-            $file     = $request->file('image');
-            $filename = time() . '_' . $file->getClientOriginalName();
-            $file->move(public_path('storage/products'), $filename);
-            $data['image'] = 'products/' . $filename;
+            // optional: delete old image if it exists
+            if (!empty($product->image)) {
+                Storage::disk('public')->delete($product->image);
+            }
+
+            $path = $request->file('image')->store('products', 'public');
+            $data['image'] = $path;
         }
 
         $product->update($data);
@@ -97,6 +100,11 @@ class AdminController extends Controller
 
     public function deleteProduct(Product $product)
     {
+        // optional: delete image when deleting product
+        if (!empty($product->image)) {
+            Storage::disk('public')->delete($product->image);
+        }
+
         $product->delete();
         return redirect()->route('admin.products')->with('success', 'Product deleted!');
     }
